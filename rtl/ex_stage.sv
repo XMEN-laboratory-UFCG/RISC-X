@@ -370,8 +370,8 @@ generate
         opdiv divisor(
             .clock(clk_i),
             .nreset(rst_n_i),
-            .a(alu_operand_1_ex),
-            .b(alu_operand_2_ex),
+            .a(alu_operand_1_id_i),
+            .b(alu_operand_2_id_i),
             .c(div_result),
             .r(rest_result),
             .in_valid_i(div_req_id_i),
@@ -403,8 +403,8 @@ generate
         multiplier multiplicador(
             .clk(clk_i),       
             .rst_n(rst_n_i),
-            .a(alu_operand_1_ex),
-            .b(alu_operand_2_ex),
+            .a(alu_operand_1_id_i),
+            .b(alu_operand_2_id_i),
             .in_valid_i(mul_req_id_i),
             .in_ready_o(mul_gnt_id_o),
             .op_sel(m_operation_id_i[1:0]),
