@@ -36,7 +36,6 @@ module multiplier (
 
     logic [31:0] next_resultado;
 
-
     always_comb begin
         next_resultado = resultado;
         

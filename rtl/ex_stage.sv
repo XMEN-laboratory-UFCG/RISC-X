@@ -129,7 +129,7 @@ logic           fpu_busy_int;
 logic [31:0]    div_result;
 logic           div_rvalid;
 logic           div_busy_int;
-logic           rest_result;
+logic [31:0]    rest_result;
 
 logic [31:0]    mul_result;
 logic           mul_rvalid;
@@ -268,12 +268,7 @@ generate
                 '{default: FPU_ADDMUL_LAT},   // ADDMUL
                 '{default: FPU_DIVSQRT_LAT},  // DIVSQRT
                 '{default: FPU_OTHERS_LAT},   // NONCOMP
-                '{default: FPU_OTHERS_LAT}    // CONV
-            },
-            // Sets the unit types for the units per operation group for each format
-            // Unit types: DISABLED, PARALLEL, MERGED
-            UnitTypes: '{
-                '{default: fpnew_pkg::MERGED},   // ADDMUL
+                '{default: FPU_OTHERS_LAT}    // CONalu_operand_1_id_iDDMUL
                 '{default: fpnew_pkg::MERGED},   // DIVSQRT
                 '{default: fpnew_pkg::PARALLEL}, // NONCOMP
                 '{default: fpnew_pkg::MERGED}    // CONV
@@ -377,7 +372,7 @@ generate
             .in_valid_i(div_req_id_i),
             .in_ready_o(div_gnt_id_o),
             .out_valid_o(div_rvalid),
-            .signal_division(m_operation_id_i[0]),
+            .signal_division(!m_operation_id_i[0]),
             .out_ready_i(1'b1)
         );
 
