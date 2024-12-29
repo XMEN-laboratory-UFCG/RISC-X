@@ -28,6 +28,9 @@ module multiplier (
     state_t state, next_state;
 
     logic [31:0] register_a, register_b;
+    logic [31:0] abs_a;
+
+    logic [1:0] operation;
 
     // Registradores internos
     logic signed   [63:0] full_result_signed;
@@ -35,6 +38,7 @@ module multiplier (
     logic          valid_reg;
 
     logic [31:0] next_resultado;
+
 
     always_comb begin
         next_resultado = resultado;
@@ -50,23 +54,36 @@ module multiplier (
                 end
             end
             MULT: begin
-                case (op_sel)
+                case (operation)
                     // 4 Operações RISC-V
                     2'b00: begin
-                        full_result_signed = ($signed(register_a) * $signed(register_b));
+                        full_result_signed = register_a * register_b;
                         next_resultado = full_result_signed[31:0];
                     end
                     2'b01: begin 
-                        full_result_signed = ($signed(register_a) * $signed(register_b));
+                        full_result_signed = (signed'(register_a) * signed'(register_b));
                         next_resultado = full_result_signed[63:32];
                     end
-                    2'b10: begin 
-                        full_result_signed = ($signed(register_a) * $unsigned(register_b));
-                        // next_resultado = full_result_signed[31:0];
+                    2'b10: begin //MULHSU
+                        
+                        if (register_a[31] == 1'b1) begin
+                            abs_a = ~register_a + 1; // Complemento de dois para negativo
+                        end else begin
+                            abs_a = register_a;     // Já é positivo
+                        end
+                        
+                        full_result_signed = abs_a * $unsigned(register_b);
+                        
+                        if (register_a[31] == 1'b1) begin
+                            full_result_signed = ~full_result_signed + 1; // Complemento de dois para ajustar o sinal
+                        end else begin
+                            full_result_signed = full_result_signed;      // Já é positivo
+                        end
+                        
                         next_resultado = full_result_signed[63:32];
                     end
                     2'b11: begin
-                        full_result_unsigned = ($unsigned(register_a) * $unsigned(register_b));
+                        full_result_unsigned = (unsigned'(register_a) * unsigned'(register_b));
                         next_resultado = full_result_unsigned[63:32];
                     end
                 endcase
@@ -89,12 +106,17 @@ module multiplier (
     always_ff @(posedge clk or negedge rst_n) begin
         if (!rst_n) begin
             state <= IDLE;
+            resultado <= 32'b0;
+            register_a <= 32'b0;
+            register_b <= 32'b0;
+            operation <= 2'b00;
         end else begin
             resultado <= next_resultado;
             case (state)
                 IDLE: begin
                     register_a <= a;
                     register_b <= b;
+                    operation <= op_sel;
                     state <= next_state;
                 end
                 MULT: begin

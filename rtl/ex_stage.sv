@@ -268,7 +268,12 @@ generate
                 '{default: FPU_ADDMUL_LAT},   // ADDMUL
                 '{default: FPU_DIVSQRT_LAT},  // DIVSQRT
                 '{default: FPU_OTHERS_LAT},   // NONCOMP
-                '{default: FPU_OTHERS_LAT}    // CONalu_operand_1_id_iDDMUL
+                '{default: FPU_OTHERS_LAT}    // CONV
+            },
+            // Sets the unit types for the units per operation group for each format
+            // Unit types: DISABLED, PARALLEL, MERGED
+            UnitTypes: '{
+                '{default: fpnew_pkg::MERGED},   // ADDMUL
                 '{default: fpnew_pkg::MERGED},   // DIVSQRT
                 '{default: fpnew_pkg::PARALLEL}, // NONCOMP
                 '{default: fpnew_pkg::MERGED}    // CONV
