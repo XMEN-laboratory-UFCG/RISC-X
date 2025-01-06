@@ -155,14 +155,18 @@ module opdiv(
             state <= next;
             in_ready_o  <= next_in_ready_o;
             out_valid_o <= next_out_valid_o;
-            if(k==0)    signal_division_intern <=  signal_division;
-            else        signal_division_intern <= in_valid_i && in_ready_o ? signal_division : signal_division_intern;
+            
         end
     end
 
 
-    always_comb case(state) 
-        IDLE                        :                               {next,next_in_ready_o,next_out_valid_o} = (in_valid_i && in_ready_o) ? {INITIALISE_AND_COUNTER_BITS,2'b00}:{IDLE,2'b10} ;
+    always_comb begin 
+    
+    case(state) 
+        IDLE:begin      
+            {next,next_in_ready_o,next_out_valid_o} = (in_valid_i && in_ready_o) ? {INITIALISE_AND_COUNTER_BITS,2'b00}:{IDLE,2'b10} ;
+            if(in_valid_i && in_ready_o)    signal_division_intern <=  signal_division;
+        end
         INITIALISE_AND_COUNTER_BITS :                               {next,next_in_ready_o,next_out_valid_o} = {SET_AK_MINUEND,2'b00}                                                        ;
         SET_AK_MINUEND              :                               {next,next_in_ready_o,next_out_valid_o} = {LOOP,2'b00}                                                                  ;
         LOOP                        :begin 
@@ -179,13 +183,14 @@ module opdiv(
                                      end
         default                     : {next,next_in_ready_o,next_out_valid_o} = {IDLE,2'b10} ;
     endcase
+    end
     assign r_temp =  compair ? minuend - b_reg: minuend ;//erro--------------------
     always_comb 
         if(out_valid_o && out_ready_i)begin
             if(signal_division_intern)
                 if(b_reg == '0)begin//mudou &&
                     c = {32{1'b1}};
-                    r = a_signal ? ~a_reg[30:0]+1:a_reg[30:0];
+                    r = a_signal ? (~a_reg[31:0]+1'b1):a_reg[30:0];
                 end
                 else if(a_reg[30:0] != 0 && a_reg[30:0] < b_reg[30:0])begin
                     c = {32{1'b0}};
@@ -215,7 +220,7 @@ module opdiv(
                             default: r = 15;
                         endcase
                 end else begin  
-                     if(b_reg[31:0] == 0)begin
+                     if(b_reg[31:0] == '0)begin
                         c = {32{1'b1}};
                         r = a_reg[31:0];
                     end
